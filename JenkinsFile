@@ -2,8 +2,8 @@ pipeline {
     agent any
     parameters {
         choice(name: 'NUMBER',
-            choices: [10,20,30,40,50,60,70,80,90],
-            description: 'Select the value for F(n) for the Fibonnai sequence.')
+               choices: [10,20,30,40,50,60,70,80,90],
+               description: 'Select the value for F(n) for the Fibonnai sequence.')
     }
     options {
         buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '10'))
@@ -14,27 +14,22 @@ pipeline {
         cron '@midnight'
     }
     stages {
-        stage('Make executable') {
+        stage('Check for script') {
             steps {
-                bat('chmod +x ./scripts/fibonacci.sh')
+                // 'chmod' is not a Windows command and is not needed.
+                // We'll just echo a message instead.
+                echo "Skipping 'chmod', not required on Windows."
             }
         }
-        stage('Relative path') {
+        stage('Run Fibonacci Script') {
             steps {
-                bat("./scripts/fibonacci.sh ${env.NUMBER}")
-            }
-        }
-        stage('Full path') {
-            steps {
-                bat("${env.WORKSPACE}/scripts/fibonacci.sh ${env.NUMBER}")
-            }
-        }
-        stage('Change directory') {
-            steps {
-                dir("${env.WORKSPACE}/scripts"){
-                    bat("./fibonacci.sh ${env.NUMBER}")
-                }
+                // We only need one stage to run the script.
+                // We use 'bat' to call the Windows batch script '.bat'
+                // and pass the 'NUMBER' parameter to it.
+                // Note the Windows-style backslashes '\'.
+                bat ".\\scripts\\fibonacci.bat ${env.NUMBER}"
             }
         }
     }
 }
+
